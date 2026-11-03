@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Art Gallery Bistro: Sip & Explore</title>
+<style>
+:root{--bg:#f5efe3;--ink:#2b1a12;--wine:#6b1d2a;--gold:#c9a24b;--wood:#3b2418;--card:#fffaf0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1210;--ink:#f3eadb;--card:#2b1a17}}
+:root[data-theme="dark"]{--bg:#1e1210;--ink:#f3eadb;--card:#2b1a17}
+html,body{height:100%;margin:0;background:#1d0b0a;overscroll-behavior:none}
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+.scr{position:absolute;inset:0;display:none;flex-direction:column}.scr.on{display:flex}
+#menu{background:radial-gradient(120% 80% at 50% 0%,#7d2434,#3b1018 60%,#1d0b0a);color:#f5efe3;align-items:center;justify-content:center;gap:11px;text-align:center;padding:24px}
+h1{font-weight:400;letter-spacing:.12em;color:var(--gold);font-size:31px;margin:0;line-height:1.15}
+.sub{letter-spacing:.28em;font-size:11px;opacity:.8;margin-bottom:14px}
+.frame{border:1px solid var(--gold);padding:5px;margin-bottom:6px}.frame div{border:1px solid rgba(201,162,75,.5);padding:18px 22px}
+button{font:inherit;color:inherit;cursor:pointer}
+.mb{width:78%;padding:13px;border:1px solid var(--gold);background:rgba(0,0,0,.2);color:#f5efe3;font-size:15px;letter-spacing:.06em;border-radius:2px}
+.mb.pri{background:var(--gold);color:#2b1a12}
+.hd{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(201,162,75,.45)}
+.hd h2{margin:0;font-weight:400;font-size:20px}.hd button{background:none;border:0;font-size:26px;color:var(--gold);padding:0 6px}
+.grid{overflow:auto;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.card{background:var(--card);border:1px solid rgba(201,162,75,.55);padding:10px;border-radius:3px;font-size:13px;line-height:1.35}
+.card b{display:block;font-size:14px}.card small{opacity:.75}.card canvas{width:100%;display:block;margin-bottom:6px}.card.lock{opacity:.4}
+.card.wide{grid-column:1/3}.bar{height:6px;background:rgba(201,162,75,.25);margin-top:7px}.bar i{display:block;height:100%;background:var(--gold)}
+.list{overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+#hud{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#2a130f;color:#f5efe3;font-size:14px}
+#hud b{color:var(--gold);font-weight:400}#hud button{background:none;border:1px solid var(--gold);color:var(--gold);border-radius:2px;padding:4px 10px}
+#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#1d0b0a}
+#cv{touch-action:none;display:block}
+#hint{background:#2a130f;color:#d9c9a8;font-size:12px;text-align:center;padding:7px;letter-spacing:.04em}
+#modal{position:absolute;inset:0;background:rgba(20,8,8,.62);display:none;align-items:center;justify-content:center;padding:18px;z-index:20}
+.box{background:var(--card);color:var(--ink);padding:18px;border-radius:4px;border:1px solid var(--gold);width:100%;max-height:92%;overflow:auto;text-align:center;line-height:1.4}
+.box h3{margin:6px 0;font-weight:400;font-size:21px}.box p{margin:6px 0;font-size:14px}.box canvas{max-width:100%;border:6px solid var(--gold);display:block;margin:0 auto 8px}
+.opts{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.opts button,.act{padding:11px;border:1px solid var(--gold);background:transparent;border-radius:2px;font-size:15px}
+.act{background:var(--wine);color:#fff;border-color:var(--wine);width:100%;margin-top:6px}
+.opts button.ok{background:#3e6b3f;color:#fff}.opts button.bad{background:#8a2a3a;color:#fff}
+.sw{display:inline-block;width:34px;height:34px;border-radius:50%;border:2px solid var(--gold)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid rgba(201,162,75,.35)}
+#toast{position:absolute;left:50%;top:70px;transform:translateX(-50%);background:var(--wine);color:#fff;padding:9px 16px;border:1px solid var(--gold);font-size:13px;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;max-width:90%;text-align:center}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style></head><body>
+<div id="app">
+<div id="menu" class="scr on">
+ <div class="frame"><div><h1>ART GALLERY<br>BISTRO</h1><div class="sub" style="margin:8px 0 0">SIP &amp; EXPLORE</div></div></div>
+ <button class="mb pri" id="bplay">Play</button>
+ <button class="mb" data-go="wines">Wine Collection</button>
+ <button class="mb" data-go="apps">Appetizer Menu</button>
+ <button class="mb" data-go="arts">Art Collection</button>
+ <button class="mb" data-go="chal">Challenges</button>
+ <button class="mb" data-go="set">Settings</button>
+ <div class="sub" id="mpts" style="margin-top:10px"></div>
+</div>
+<div id="play" class="scr"><div id="hud"><span id="rn"></span><span><b id="pt">0</b> pts</span><button id="pb">Pause</button></div>
+ <div id="stage"><canvas id="cv" width="720" height="1200"></canvas></div>
+ <div id="hint">Tap to walk. Tap a painting, sculpture, table or door.</div></div>
+<div id="wines" class="scr"><div class="hd"><button data-go="menu">‹</button><h2>Wine Collection</h2></div><div class="grid" id="wl"></div></div>
+<div id="apps" class="scr"><div class="hd"><button data-go="menu">‹</button><h2>Appetizer Menu</h2></div><div class="grid" id="al"></div></div>
+<div id="arts" class="scr"><div class="hd"><button data-go="menu">‹</button><h2>Art Collection</h2></div><div class="grid" id="tl"></div></div>
+<div id="chal" class="scr"><div class="hd"><button data-go="menu">‹</button><h2>Challenges</h2></div><div class="list" id="chl"></div></div>
+<div id="set" class="scr"><div class="hd"><button data-go="menu">‹</button><h2>Settings</h2></div><div class="list">
+ <div class="row">Ambient music<button class="act" style="width:90px;margin:0" id="tm"></button></div>
+ <div class="row">Sound effects<button class="act" style="width:90px;margin:0" id="ts"></button></div>
+ <div class="row">Reset all progress<button class="act" style="width:90px;margin:0" id="rs">Reset</button></div></div></div>
+<div id="modal"><div class="box" id="mb"></div></div>
+<div id="toast"></div>
+</div>
+<script>
+const $=s=>document.querySelector(s),W=360,H=600;
+const WINES=[
+{id:'sb',n:'Sauvignon Blanc',c:'#e8e29a',t:'White',a:'goat',x:'Crisp and herbal; its acidity cuts through creamy chèvre.'},
+{id:'cab',n:'Cabernet Sauvignon',c:'#4a0e1c',t:'Red',a:'aged',x:'Bold tannins love the crystalline bite of aged cheese.'},
+{id:'ros',n:'Provence Rosé',c:'#f0a1a8',t:'Rosé',a:'med',x:'Dry and fresh, perfect beside hummus and mezze.'},
+{id:'pn',n:'Pinot Noir',c:'#8a2a3a',t:'Red',a:'char',x:'Silky and light, it flatters cured meats.'},
+{id:'pro',n:'Prosecco',c:'#f3e6a0',t:'Sparkling',a:'olive',x:'Bubbles refresh the salt of olives and bread.'},
+{id:'ries',n:'Riesling',c:'#efe08a',t:'White',a:'grape',x:'A touch of sweetness mirrors grapes and walnuts.'},
+{id:'chard',n:'Chardonnay',c:'#e2c866',t:'White',a:'brus',x:'Rounded and buttery beside toasted bruschetta.'}];
+const AP={goat:{n:'Goat cheese platter',e:'🐐'},aged:{n:'Aged cheese board',e:'🧀'},med:{n:'Hummus & mezze',e:'🧆'},char:{n:'Charcuterie board',e:'🥓'},olive:{n:'Olives & artisan bread',e:'🫒'},grape:{n:'Grapes, walnuts & crackers',e:'🍇'},brus:{n:'Tomato bruschetta',e:'🍅'}};
+const ARTS=[['Amber Hours','Mara Venn','Warm glazes dissolve into a late-afternoon haze.'],['Quiet Geometry','Ilya Roth','Rectangles of ochre hold an almost musical silence.'],['Vineyard at Dusk','Celeste Aubry','Burgundy strokes trace rows of vines fading into night.'],['Salt and Linen','Tomas Reyes','Pale layers recall sea air and sun-washed cloth.'],['Gold Study No. 4','Hana Lindqvist','Leaf and pigment negotiate a gentle horizon.'],['The Long Pour','Dario Ferrante','A single ribbon of crimson falls through cream.'],['Terrace in Blue','Noor Haddad','Cool planes of cobalt open onto Mediterranean calm.'],['Echo of Oak','Beatrix Holm','Dark wood tones rise like a cellar breathing slowly.'],['Fig and Shadow','Lucien Marchetti','Soft violets gather around a hidden orchard.'],['Paper Sun','Yuki Tanaka','A pale disc floats over folded fields of colour.'],['Cellar Light','Anselm Brandt','Candle gold pierces a vault of deep maroon.'],['Final Toast','Odile Navarre','Clinking arcs of rose and gold close the evening.']];
+const SCS=[['Ribbon of Marble','Petra Wolfe'],['Stacked Orbs','Eero Dahl'],['The Open Ring','Mina Costa'],['Ascending Flame','Rafael Ortiz']];
+const HID=[['Gilded Cherub','👼'],['Crystal Grape','🍇'],['Brass Key','🗝️'],['Silver Pear','🍐']];
+const PAL=[['#7a2434','#e9d9b8','#c9a24b','#3b2418','#f5efe3'],['#1f3a5f','#f3ead6','#c9a24b','#6b1d2a','#9db8d6'],['#3b2418','#c9a24b','#f5efe3','#6b1d2a','#a8743a'],['#f0e6d2','#d9b9a6','#6b1d2a','#c9a24b','#8a9a8c'],['#4a1022','#c9a24b','#e8c3c8','#f5efe3','#2b1a12'],['#2f4a3a','#e6dcc0','#c9a24b','#6b1d2a','#f0d9a8']];
+const RN=['Entrance Hall','Sculpture Atrium','Modern Wing','Cellar Terrace'],TH=[0,250,700,1200];
+const WALL=['#f4eee2','#efe6d6','#f6f1e8','#eadfcb'],FL=[['#efe7d8','#e3d8c2'],['#ece4d4','#ddd0b8'],['#f1ebdf','#e5dccb'],['#e8dcc6','#d8c8aa']];
+const LY=[{sc:[180,340],wn:[70,470],bf:[290,470],hd:[325,250]},{sc:[110,350],wn:[270,480],bf:[110,490],hd:[40,300]},{sc:[250,340],wn:[90,480],bf:[270,480],hd:[180,560]},{sc:[180,320],wn:[70,470],bf:[290,470],hd:[320,560]}];
+const CH=[{n:'Art lover',d:'View 8 artworks',g:8,r:200,p:()=>Object.keys(S.seen).length},{n:'Treasure hunter',d:'Find 3 hidden objects',g:3,r:300,p:()=>Object.keys(S.hid).length},{n:'Sommelier',d:'Pair 5 wines correctly',g:5,r:300,p:()=>S.pairOk},{n:'Streak master',d:'Reach a pairing streak of 4',g:4,r:250,p:()=>S.best},{n:'Gourmand',d:'Collect all 7 appetizers',g:7,r:400,p:()=>Object.keys(S.apps).length},{n:'Curator',d:'Unlock every room',g:4,r:500,p:()=>TH.filter(t=>S.pts>=t).length}];
+const def=()=>({pts:0,room:0,seen:{},hid:{},ws:{},wo:{},apps:{},streak:0,best:0,pairOk:0,cl:{},mu:1,sf:1});
+let S=def();try{Object.assign(S,JSON.parse(localStorage.getItem('agb')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('agb',JSON.stringify(S))}catch(e){}};
+/* audio */
+let AC,mg,sg;
+function aud(){if(AC){AC.state==='suspended'&&AC.resume();return}try{AC=new(window.AudioContext||window.webkitAudioContext)();mg=AC.createGain();sg=AC.createGain();mg.connect(AC.destination);sg.connect(AC.destination);vol();let i=0;const ch=[[220,277,330],[196,247,294],[175,220,262],[196,247,330]];setInterval(()=>{if(!S.mu||AC.state!=='running')return;const t=AC.currentTime,c=ch[i++%4];c.forEach(f=>tone(f,t,3.6,'sine',.18,mg,1));const pn=[440,494,587,659,784];tone(pn[Math.random()*5|0],t+1+Math.random(),1.6,'triangle',.12,mg)},3200)}catch(e){}}
+function vol(){if(!AC)return;mg.gain.value=S.mu?.35:0;sg.gain.value=S.sf?.5:0}
+function tone(f,t,d,ty,v,dest,slow){const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=f;const a=slow?1:.01;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(dest);o.start(t);o.stop(t+d+.05)}
+function sfx(k){if(!AC||!S.sf)return;const t=AC.currentTime,P={ok:[[660,0],[880,.12]],win:[[523,0],[659,.1],[784,.2],[1046,.3]],bad:[[160,0],[130,.12]],tap:[[600,0]],gem:[[988,0],[1318,.08]]}[k];P.forEach(([f,d])=>tone(f,t+d,k==='bad'?.3:.35,k==='bad'?'sawtooth':'triangle',k==='bad'?.12:.25,sg))}
+/* ui */
+let cur='menu',paused=false,mo=false;
+function go(id,nh){cur=id;document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));if(!nh){try{location.hash=id}catch(e){}}
+ if(id==='menu'){$('#mpts').textContent=S.pts+' gallery points';$('#bplay').textContent=S.pts>0?'Continue':'Play'}
+ if(id==='wines')lw();if(id==='apps')la();if(id==='arts')lt();if(id==='chal')lc();if(id==='set')ls();if(id==='play'){fit();hud()}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){aud();sfx('tap');go(b.dataset.go)}});
+$('#bplay').onclick=()=>{aud();sfx('tap');go('play')};
+addEventListener('hashchange',()=>{const h=location.hash.slice(1)||'menu';if(h===cur)return;if(cur==='play'&&h==='menu'){try{location.hash='play'}catch(e){}pause()}else go(h,1)});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&cur==='play')pause()});
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)}
+function modal(h){mo=true;$('#mb').innerHTML=h;$('#modal').style.display='flex'}
+function closeM(){mo=false;$('#modal').style.display='none'}
+function hud(){$('#pt').textContent=S.pts;$('#rn').textContent=RN[S.room]}
+function add(n){S.pts+=n;chk();save();hud()}
+function chk(){CH.forEach((c,i)=>{if(!S.cl[i]&&c.p()>=c.g){S.cl[i]=1;S.pts+=c.r;toast('Challenge complete: '+c.n+' +'+c.r);sfx('win')}})}
+function pause(){if(mo&&!paused)return;paused=true;modal('<h3>Paused</h3><p>The gallery waits for you.</p><button class="act" id="r1">Resume</button><button class="act" id="r2" style="background:transparent;color:inherit;border-color:var(--gold)">Restart gallery</button><button class="act" id="r3" style="background:transparent;color:inherit;border-color:var(--gold)">Main menu</button>');
+ $('#r1').onclick=()=>{paused=false;closeM()};$('#r2').onclick=()=>{S=Object.assign(def(),{mu:S.mu,sf:S.sf});save();P.x=180;P.y=500;P.tx=180;P.ty=500;pend=null;paused=false;closeM();hud();toast('Gallery restarted')};$('#r3').onclick=()=>{paused=false;closeM();go('menu')}}
+$('#pb').onclick=()=>{aud();pause()};
+const card=(c,h)=>`<div class="card ${c?'':'lock'}">${h}</div>`;
+function lw(){$('#wl').innerHTML=WINES.map(w=>card(S.ws[w.id],S.ws[w.id]?`<span class=sw style="background:${w.c}"></span><b>${w.n}</b><small>${w.t}${S.wo[w.id]?' · mastered':''}</small><br><small>${w.x}</small>`:'<b>Undiscovered</b><small>Visit a tasting station</small>')).join('')}
+function la(){$('#al').innerHTML=Object.keys(AP).map(k=>card(S.apps[k],S.apps[k]?`<div style="font-size:30px">${AP[k].e}</div><b>${AP[k].n}</b>`:'<b>Not yet collected</b><small>Pair a wine or visit a buffet</small>')).join('')}
+function lt(){const g=$('#tl');g.innerHTML='';ARTS.forEach((a,i)=>{const d=document.createElement('div'),k='a'+i,s=S.seen[k];d.className='card'+(s?'':' lock');if(s){const c=document.createElement('canvas');c.width=160;c.height=110;paint(c.getContext('2d'),i,0,0,160,110);d.appendChild(c);d.insertAdjacentHTML('beforeend',`<b>${a[0]}</b><small>${a[1]}</small>`)}else d.innerHTML='<b>?</b><small>Find it in room '+(Math.floor(i/3)+1)+'</small>';g.appendChild(d)});
+ SCS.forEach((a,i)=>{const d=document.createElement('div'),s=S.seen['s'+i];d.className='card'+(s?'':' lock');d.innerHTML=s?`<b>${a[0]}</b><small>Sculpture · ${a[1]}</small>`:'<b>?</b><small>Sculpture, room '+(i+1)+'</small>';g.appendChild(d)})}
+function lc(){$('#chl').innerHTML=CH.map((c,i)=>{const p=Math.min(c.g,c.p());return`<div class="card ${S.cl[i]?'':''}"><b>${c.n}${S.cl[i]?' ✓':''}</b>${c.d} · reward ${c.r}<div class=bar><i style="width:${p/c.g*100}%"></i></div><small>${p} / ${c.g}</small></div>`}).join('')}
+function ls(){$('#tm').textContent=S.mu?'On':'Off';$('#ts').textContent=S.sf?'On':'Off'}
+$('#tm').onclick=()=>{S.mu^=1;save();vol();aud();ls()};$('#ts').onclick=()=>{S.sf^=1;save();vol();ls();sfx('ok')};
+$('#rs').onclick=()=>{S=Object.assign(def(),{mu:S.mu,sf:S.sf});save();toast('Progress reset');P.x=180;P.y=500;P.tx=180;P.ty=500}
+/* art drawing */
+function rng(s){return()=>(s=(s*16807+7)%2147483647)/2147483647}
+function paint(c,s,x,y,w,h){const r=rng(s*977+13),p=PAL[s%PAL.length];c.save();c.beginPath();c.rect(x,y,w,h);c.clip();const g=c.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,p[0]);g.addColorStop(1,p[1]);c.fillStyle=g;c.fillRect(x,y,w,h);
+ for(let i=0;i<7;i++){c.globalAlpha=.55+r()*.4;c.fillStyle=c.strokeStyle=p[2+i%3];const t=r();if(t<.4){c.beginPath();c.arc(x+r()*w,y+r()*h,w*(.1+r()*.25),0,7);c.fill()}else if(t<.75)c.fillRect(x+r()*w*.8,y+r()*h*.8,w*(.1+r()*.4),h*(.08+r()*.3));else{c.lineWidth=2+r()*4;c.beginPath();c.moveTo(x+r()*w,y+r()*h);c.bezierCurveTo(x+r()*w,y+r()*h,x+r()*w,y+r()*h,x+r()*w,y+r()*h);c.stroke()}}c.restore()}
+function sculpt(c,x,y,s){c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(x,y+14,34,9,0,0,7);c.fill();c.fillStyle='#fbf8f1';c.strokeStyle='#d8cdb6';c.fillRect(x-24,y-18,48,30);c.strokeRect(x-24,y-18,48,30);
+ const g=c.createLinearGradient(x-20,0,x+20,0);g.addColorStop(0,'#8a5a2b');g.addColorStop(.5,'#e8c77a');g.addColorStop(1,'#7a4a20');c.fillStyle=g;c.strokeStyle=g;
+ if(s%4===0){c.beginPath();c.ellipse(x,y-48,13,34,.3,0,7);c.fill();c.fillStyle='#fbf8f1';c.beginPath();c.ellipse(x+3,y-48,4,14,.3,0,7);c.fill()}
+ else if(s%4===1){[[0,-30,16],[3,-52,12],[-2,-68,8]].forEach(([a,b,r])=>{c.beginPath();c.arc(x+a,y+b,r,0,7);c.fill()})}
+ else if(s%4===2){c.lineWidth=9;c.beginPath();c.arc(x,y-44,22,0,7);c.stroke()}
+ else{c.beginPath();c.moveTo(x-16,y-18);c.quadraticCurveTo(x-22,y-60,x,y-92);c.quadraticCurveTo(x+22,y-56,x+16,y-18);c.fill()}}
+/* world */
+const P={x:180,y:500,tx:180,ty:500,f:1,mv:0};let pend=null,FLR=[];
+const cv=$('#cv'),cx=cv.getContext('2d');cx.scale(2,2);
+function fit(){const s=$('#stage'),k=Math.min(s.clientWidth/W,s.clientHeight/H);cv.style.width=W*k+'px';cv.style.height=H*k+'px'}addEventListener('resize',fit);
+function objs(r){const o=[],L=LY[r];for(let i=0;i<3;i++)o.push({t:'art',k:'a'+(r*3+i),i:r*3+i,x:70+i*110,y:190,tx:70+i*110,ty:190,n:ARTS[r*3+i][0]});
+ o.push({t:'sc',k:'s'+r,i:r,x:L.sc[0],y:L.sc[1],tx:L.sc[0],ty:L.sc[1]+42,n:SCS[r][0]});
+ o.push({t:'wine',x:L.wn[0],y:L.wn[1],tx:L.wn[0],ty:Math.min(570,L.wn[1]+40),n:'Wine tasting'});
+ o.push({t:'buf',x:L.bf[0],y:L.bf[1],tx:L.bf[0],ty:Math.min(570,L.bf[1]+40),n:'Appetizer buffet'});
+ o.push({t:'hid',k:'h'+r,i:r,x:L.hd[0],y:L.hd[1],tx:L.hd[0],ty:Math.min(570,L.hd[1]+22),n:HID[r][0]});
+ if(r<3)o.push({t:'door',d:1,x:338,y:390,tx:312,ty:390,n:'Next room'});if(r>0)o.push({t:'door',d:-1,x:22,y:390,tx:48,ty:390,n:'Previous room'});return o}
+function hit(o,x,y){if(o.t==='art')return Math.abs(x-o.x)<44&&y>40&&y<150;if(o.t==='sc')return Math.abs(x-o.x)<40&&y>o.y-95&&y<o.y+16;if(o.t==='hid')return !S.hid[o.k]&&Math.hypot(x-o.x,y-o.y)<30;if(o.t==='door')return Math.abs(x-o.x)<28&&Math.abs(y-o.y)<72;return Math.abs(x-o.x)<52&&Math.abs(y-o.y+10)<42}
+cv.addEventListener('pointerdown',e=>{if(cur!=='play'||paused||mo)return;aud();const b=cv.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*W,y=(e.clientY-b.top)/b.height*H;const o=objs(S.room).find(o=>hit(o,x,y));
+ if(o){pend=o;P.tx=o.tx;P.ty=o.ty}else{pend=null;P.tx=Math.max(20,Math.min(340,x));P.ty=Math.max(185,Math.min(570,y))}sfx('tap')});
+function upd(dt){const dx=P.tx-P.x,dy=P.ty-P.y,d=Math.hypot(dx,dy);P.mv=d>2;if(d>2){const s=Math.min(d,150*dt);P.x+=dx/d*s;P.y+=dy/d*s;if(Math.abs(dx)>3)P.f=dx>0?1:-1}
+ if(pend&&d<8){const o=pend;pend=null;act(o)}}
+function act(o){if(o.t==='art'||o.t==='sc'){const f=!S.seen[o.k];if(f){S.seen[o.k]=1;add(o.t==='sc'?80:50);sfx('gem')}
+  modal(`<canvas id=mc width=240 height=${o.t==='art'?170:150}></canvas><h3>${o.n}</h3><p><i>${o.t==='art'?ARTS[o.i][1]:SCS[o.i][1]}</i></p><p>${o.t==='art'?ARTS[o.i][2]:'Polished metal catches the gallery light and changes with every step you take.'}</p>${f?'<p style="color:var(--wine)">New discovery! +'+(o.t==='sc'?80:50)+'</p>':''}<button class=act id=cl>Continue</button>`);
+  const c=$('#mc').getContext('2d');if(o.t==='art')paint(c,o.i,0,0,240,170);else{c.fillStyle='#efe6d6';c.fillRect(0,0,240,150);sculpt(c,120,118,o.i)}$('#cl').onclick=closeM}
+ else if(o.t==='hid'){S.hid[o.k]=1;add(150);sfx('win');toast('Hidden object found: '+o.n+' +150')}
+ else if(o.t==='buf'){const rem=Object.keys(AP).filter(k=>!S.apps[k]);if(rem.length){const k=rem[Math.random()*rem.length|0];S.apps[k]=1;add(30);sfx('gem');toast(AP[k].e+' Collected: '+AP[k].n+' +30')}else{add(10);toast('Enjoy the buffet +10');sfx('ok')}}
+ else if(o.t==='wine'){pr={i:0,ok:0,pts:0};round()}
+ else if(o.t==='door'){const n=S.room+o.d;if(o.d>0&&S.pts<TH[n]){toast('Locked: reach '+TH[n]+' points ('+(TH[n]-S.pts)+' to go)');sfx('bad')}else{S.room=n;P.x=o.d>0?50:310;P.y=390;P.tx=P.x;P.ty=P.y;save();hud();sfx('ok');toast(RN[n])}}}
+/* pairing */
+let pr;
+function round(){const w=WINES[Math.random()*WINES.length|0];S.ws[w.id]=1;const ot=Object.keys(AP).filter(x=>x!==w.a).sort(()=>Math.random()-.5).slice(0,2),op=[w.a,...ot].sort(()=>Math.random()-.5);
+ modal(`<p>Tasting ${pr.i+1} of 3 · streak ${S.streak}</p><span class=sw style="background:${w.c}"></span><h3>${w.n}</h3><p>${w.t} wine. Which appetizer pairs best?</p><div class=opts>${op.map(o=>`<button data-o="${o}">${AP[o].e} ${AP[o].n}</button>`).join('')}</div><div id=fb></div>`);
+ document.querySelectorAll('.opts button').forEach(b=>b.onclick=()=>{const o=b.dataset.o,ok=o===w.a;document.querySelectorAll('.opts button').forEach(x=>{x.disabled=true;if(x.dataset.o===w.a)x.classList.add('ok')});
+  if(ok){const g=100+25*S.streak;S.streak++;S.best=Math.max(S.best,S.streak);S.pairOk++;S.wo[w.id]=1;S.apps[w.a]=1;pr.ok++;pr.pts+=g;add(g);sfx('ok');$('#fb').innerHTML=`<p style="color:#3e6b3f">Perfect pairing! +${g}</p><p>${w.x}</p>`}else{S.streak=0;b.classList.add('bad');sfx('bad');save();$('#fb').innerHTML=`<p style="color:var(--wine)">Not quite.</p><p>${w.x}</p>`}
+  pr.i++;$('#fb').insertAdjacentHTML('beforeend',`<button class=act id=nx>${pr.i>=3?'Finish tasting':'Next wine'}</button>`);$('#nx').onclick=()=>{if(pr.i>=3){modal(`<h3>Tasting complete</h3><p>${pr.ok} of 3 pairings correct.</p><p>+${pr.pts} points</p><button class=act id=cl>Back to the gallery</button>`);$('#cl').onclick=closeM}else round()}})}
+/* render */
+function floor(r){const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),rr=rng(r+5);for(let y=170,j=0;y<H;y+=45,j++)for(let x=0,i=0;x<W;x+=45,i++){g.fillStyle=FL[r][(i+j)%2];g.fillRect(x,y,45,45)}
+ g.strokeStyle='rgba(120,100,80,.12)';for(let i=0;i<40;i++){g.beginPath();g.moveTo(rr()*W,170+rr()*430);g.bezierCurveTo(rr()*W,170+rr()*430,rr()*W,170+rr()*430,rr()*W,170+rr()*430);g.stroke()}return c}
+function draw(t){const r=S.room,c=cx;if(!FLR[r])FLR[r]=floor(r);const wg=c.createLinearGradient(0,0,0,170);wg.addColorStop(0,'#fffdf7');wg.addColorStop(1,WALL[r]);c.fillStyle=wg;c.fillRect(0,0,W,170);
+ c.fillStyle='#3b2418';c.fillRect(0,0,W,12);c.fillStyle='#c9a24b';c.fillRect(0,166,W,5);c.drawImage(FLR[r],0,0,W,H);
+ c.fillStyle='#3b2418';c.fillRect(0,0,W,12);c.fillStyle=WALL[r];c.fillRect(0,12,W,0);
+ const os=objs(r).sort((a,b)=>a.y-b.y),near=os.find(o=>o.t!=='hid'&&Math.hypot(P.x-o.tx,P.y-o.ty)<70);
+ os.filter(o=>o.t==='art').forEach(o=>{const x=o.x,g=c.createRadialGradient(x,100,5,x,100,90);g.addColorStop(0,'rgba(255,225,150,.38)');g.addColorStop(1,'rgba(255,225,150,0)');c.fillStyle=g;c.fillRect(x-90,12,180,155);
+  c.fillStyle='#c9a24b';c.fillRect(x-4,10,8,5);c.fillStyle='rgba(0,0,0,.18)';c.fillRect(x-38,52,80,100);c.fillStyle='#c9a24b';c.fillRect(x-40,46,80,100);c.fillStyle='#f5efe3';c.fillRect(x-36,50,72,92);paint(c,o.i,x-30,56,60,80);
+  c.fillStyle=S.seen[o.k]?'#c9a24b':'#bbb';c.fillRect(x-10,152,20,5)});
+ os.filter(o=>o.t!=='art').forEach(o=>{const x=o.x,y=o.y;
+  if(o.t==='sc')sculpt(c,x,y,o.i);
+  else if(o.t==='wine'){c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(x,y+10,52,8,0,0,7);c.fill();[0,1,2].forEach(i=>{c.fillStyle=WINES[(i*2+r)%7].c;c.fillRect(x-34+i*14,y-52,9,24);c.fillRect(x-31+i*14,y-60,3,9)});[18,34].forEach(d=>{c.fillStyle='rgba(255,255,255,.7)';c.beginPath();c.arc(x+d,y-36,6,0,Math.PI);c.fill();c.fillRect(x+d-.5,y-34,1,9)});c.fillStyle='#5a3825';c.fillRect(x-46,y-26,92,36);c.fillStyle='#c9a24b';c.fillRect(x-48,y-28,96,4);c.fillStyle='#e8c77a';c.font='10px Georgia';c.textAlign='center';c.fillText('TASTING',x,y-4)}
+  else if(o.t==='buf'){c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(x,y+14,46,9,0,0,7);c.fill();c.fillStyle='#5a3825';c.fillRect(x-4,y-8,8,22);c.fillStyle='#fffaf0';c.beginPath();c.ellipse(x,y-8,46,15,0,0,7);c.fill();c.strokeStyle='#c9a24b';c.stroke();c.font='17px serif';c.textAlign='center';c.fillText('🧀🍇🫒',x,y-4)}
+  else if(o.t==='hid'&&!S.hid[o.k]){const a=.5+.5*Math.sin(t*3+o.i);c.fillStyle=`rgba(255,215,100,${.25+a*.35})`;c.beginPath();c.arc(x,y,14+a*4,0,7);c.fill();c.font='18px serif';c.textAlign='center';c.globalAlpha=.75;c.fillText(HID[o.i][1],x,y+6);c.globalAlpha=1}
+  else if(o.t==='door'){const rt=o.d>0,lk=rt&&S.pts<TH[r+1];c.fillStyle='#3b2418';c.beginPath();c.moveTo(x-22,y+60);c.lineTo(x-22,y-40);c.quadraticCurveTo(x,y-80,x+22,y-40);c.lineTo(x+22,y+60);c.fill();c.strokeStyle='#c9a24b';c.lineWidth=2;c.stroke();c.lineWidth=1;c.fillStyle='#e8c77a';c.font='13px Georgia';c.textAlign='center';c.fillText(lk?'🔒':rt?'›':'‹',x,y+4);if(lk){c.font='9px Georgia';c.fillText(TH[r+1],x,y+22)}}});
+ if(near&&!mo){const o=near,ty=o.t==='art'?36:o.t==='door'?o.y-86:o.y-(o.t==='sc'?100:66),b=Math.sin(t*5)*2;c.fillStyle='#c9a24b';c.beginPath();c.moveTo(o.x-6,ty+b-8);c.lineTo(o.x+6,ty+b-8);c.lineTo(o.x,ty+b);c.fill()}
+ const bob=P.mv?Math.sin(t*14)*1.6:0,x=P.x,y=P.y;c.fillStyle='rgba(0,0,0,.22)';c.beginPath();c.ellipse(x,y+2,13,5,0,0,7);c.fill();c.fillStyle='#6b1d2a';c.beginPath();c.moveTo(x-10,y+bob);c.lineTo(x-7,y-30+bob);c.lineTo(x+7,y-30+bob);c.lineTo(x+10,y+bob);c.fill();c.fillStyle='#c9a24b';c.fillRect(x-7,y-20+bob,14,2);c.fillStyle='#f0cfb0';c.beginPath();c.arc(x,y-38+bob,8,0,7);c.fill();c.fillStyle='#2b1a12';c.beginPath();c.arc(x-P.f*1.5,y-41+bob,8,Math.PI,0);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(x+P.f*7,y-24+bob,3,0,7);c.fill();
+ const vg=c.createRadialGradient(W/2,H/2,160,W/2,H/2,420);vg.addColorStop(0,'rgba(40,15,10,0)');vg.addColorStop(1,'rgba(40,15,10,.4)');c.fillStyle=vg;c.fillRect(0,0,W,H)}
+let last=0;function loop(t){requestAnimationFrame(loop);const dt=Math.min(.05,(t-last)/1000||0);last=t;if(cur!=='play')return;if(!paused&&!mo)upd(dt);draw(t/1000)}
+chk();requestAnimationFrame(loop);go('menu',1);
+</script></body></html>
